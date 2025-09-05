@@ -1,8 +1,12 @@
-import { NextFunction, Request, Response } from "express";
+import { CookieOptions, NextFunction, Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { sendVerificationEmail } from "../utils/emailUtils";
 import { comparePassword, hashPassword } from "../utils/passwordUtils";
 import prisma from "../utils/prisma";
+import {
+    generateAccessToken,
+    generateRefreshToken,
+} from "../utils/tokenManagement";
 import { ErrorWithStatusCode } from "../utils/types";
 
 // ADJUST SUBSTRING POSITIONING WHEN EXPIRATION VALUES CHANGE!!!
@@ -13,7 +17,7 @@ const REFRESH_TOKEN_EXPIRY = parseInt(
     process.env.JWT_REFRESH_EXPIRATION!.substring(-1, 1)
 );
 
-const cookieOptions = {
+const cookieOptions: CookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
@@ -27,6 +31,7 @@ const accessTokenCookieOptions = {
 
 const refreshTokenCookieOptions = {
     ...cookieOptions,
+    path: "/api/auth/refresh",
     maxAge: REFRESH_TOKEN_EXPIRY * 24 * 60 * 60 * 1000,
 };
 
@@ -88,20 +93,24 @@ async function signUp(req: Request, res: Response, next: NextFunction) {
     }
 }
 
-async function login(req: Request, res: Response, next: NextFunction) {
-    console.log(req.validatedData);
-
+async function signin(req: Request, res: Response, next: NextFunction) {
     try {
         const { email, password } = req.validatedData;
 
+        // find user
         const user = await prisma.user.findUnique({
-            where: {
-                email,
+            where: { email },
+            select: {
+                id: true,
+                email: true,
+                password: true,
+                isVerified: true,
+                role: true,
             },
         });
         if (!user) {
-            const error: ErrorWithStatusCode = new Error("no user found!");
-            error.statusCode = 400;
+            const error: ErrorWithStatusCode = new Error("invalid credentials");
+            error.statusCode = 401;
             throw error;
         }
 
@@ -109,16 +118,63 @@ async function login(req: Request, res: Response, next: NextFunction) {
         const passwordIsEqual = await comparePassword(password, user.password);
         if (!passwordIsEqual) {
             const error: ErrorWithStatusCode = new Error(
-                "Invalid credentials!"
+                "invalid credentials!"
             );
-            error.statusCode = 400;
+            error.statusCode = 401;
             throw error;
         }
 
-        return res.status(200).json({ message: "User created", user });
+        // check if email is verified
+        if (!user.isVerified) {
+            const error: ErrorWithStatusCode = new Error(
+                "please verify your email before signing in"
+            );
+            error.statusCode = 403;
+            throw error;
+        }
+
+        // Generate tokens
+        const accessToken = generateAccessToken({
+            userId: user.id,
+            email: user.email,
+            isVerified: user.isVerified,
+        });
+
+        const refreshTokenId = uuidv4();
+        const refreshToken = generateRefreshToken({
+            userId: user.id,
+            tokenId: refreshTokenId,
+        });
+
+        // store refresh token in database
+        await prisma.refreshToken.create({
+            data: {
+                id: refreshTokenId,
+                token: refreshToken,
+                userId: user.id,
+                expiresAt: new Date(
+                    Date.now() + REFRESH_TOKEN_EXPIRY * 24 * 60 * 60 * 1000
+                ),
+            },
+        });
+
+        // set cookies
+        res.cookie("accessToken", accessToken, accessTokenCookieOptions);
+        res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
+
+        res.status(200).json({
+            message: "Signed in successfully",
+            data: {
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role,
+                },
+            },
+        });
     } catch (error) {
         next(error);
     }
 }
 
-export { login, signUp };
+export { signin, signUp };

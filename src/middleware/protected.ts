@@ -71,7 +71,7 @@ async function authenticateToken(
 
         if (!user.isVerified) {
             const error: ErrorWithStatusCode = new Error("Email not verified");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
