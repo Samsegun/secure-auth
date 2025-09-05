@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from "express";
+import { v4 as uuidv4 } from "uuid";
+import { sendVerificationEmail } from "../utils/emailUtils";
 import { comparePassword, hashPassword } from "../utils/passwordUtils";
 import prisma from "../utils/prisma";
 import { ErrorWithStatusCode } from "../utils/types";
@@ -46,16 +48,24 @@ async function signUp(req: Request, res: Response, next: NextFunction) {
             throw error;
         }
 
+        // hashpassword and generate verification token
         const hashedPassword = await hashPassword(password);
         if (!hashedPassword) {
             const error = new Error("Server error");
             throw error;
         }
+        const verificationToken = uuidv4();
+        const verificationTokenExpiry = new Date(
+            Date.now() + 24 * 60 * 60 * 1000
+        ); //24hrs
 
+        // create user
         const newUser = await prisma.user.create({
             data: {
                 email: email,
                 password: hashedPassword,
+                verificationToken,
+                verificationTokenExpiry,
             },
         });
         if (!newUser) {
@@ -63,7 +73,16 @@ async function signUp(req: Request, res: Response, next: NextFunction) {
             throw error;
         }
 
-        return res.status(201).json({ message: "User created", user: newUser });
+        // send verification email
+        await sendVerificationEmail(email, verificationToken);
+
+        return res.status(201).json({
+            message: "User created. Please check email to verify account",
+            data: {
+                user: newUser.id,
+                email: newUser.email,
+            },
+        });
     } catch (error) {
         next(error);
     }
