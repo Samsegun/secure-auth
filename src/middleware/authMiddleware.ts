@@ -1,45 +1,39 @@
-import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import { NextFunction, Response } from "express";
 import prisma from "../utils/prisma";
 import { verifyAccessToken } from "../utils/tokenManagement";
-import {
-    AuthenticatedRequest,
-    ErrorWithStatusCode,
-    JwtPayload,
-    ValidationError,
-} from "../utils/types";
+import { AuthenticatedRequest, ErrorWithStatusCode } from "../utils/types";
 
-function authRequired(req: Request, res: Response, next: NextFunction) {
-    try {
-        const bearer = req.headers.authorization;
+// function authRequired(req: Request, res: Response, next: NextFunction) {
+//     try {
+//         const bearer = req.headers.authorization;
 
-        if (!bearer) {
-            const error: ValidationError = new Error("Not Authorized!");
-            error.statusCode = 401;
-            throw error;
-        }
+//         if (!bearer) {
+//             const error: ValidationError = new Error("Not Authorized!");
+//             error.statusCode = 401;
+//             throw error;
+//         }
 
-        const token = bearer.split(" ")[1];
-        if (!token) {
-            const error: ValidationError = new Error("No valid token!");
-            error!.statusCode = 401;
-            throw error;
-        }
+//         const token = bearer.split(" ")[1];
+//         if (!token) {
+//             const error: ValidationError = new Error("No valid token!");
+//             error!.statusCode = 401;
+//             throw error;
+//         }
 
-        if (!process.env.JWT_SECRET) {
-            throw new Error(
-                "JWT_SECRET is not defined in the environment variables"
-            );
-        }
+//         if (!process.env.JWT_SECRET) {
+//             throw new Error(
+//                 "JWT_SECRET is not defined in the environment variables"
+//             );
+//         }
 
-        const user = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
-        req.userId = user.userId;
+//         const user = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
+//         req.userId = user.userId;
 
-        next();
-    } catch (error) {
-        next(error);
-    }
-}
+//         next();
+//     } catch (error) {
+//         next(error);
+//     }
+// }
 
 async function authenticateToken(
     req: AuthenticatedRequest,
@@ -87,4 +81,4 @@ async function authenticateToken(
     }
 }
 
-export { authenticateToken, authRequired };
+export { authenticateToken };

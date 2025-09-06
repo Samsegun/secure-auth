@@ -1,5 +1,10 @@
-import { CookieOptions, NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
+import {
+    accessTokenCookieOptions,
+    authConfig,
+    refreshTokenCookieOptions,
+} from "../config/auth";
 import { sendVerificationEmail } from "../utils/emailUtils";
 import { comparePassword, hashPassword } from "../utils/passwordUtils";
 import prisma from "../utils/prisma";
@@ -8,32 +13,6 @@ import {
     generateRefreshToken,
 } from "../utils/tokenManagement";
 import { ErrorWithStatusCode } from "../utils/types";
-
-// ADJUST SUBSTRING POSITIONING WHEN EXPIRATION VALUES CHANGE!!!
-const ACCESS_TOEKN_EXPIRY = parseInt(
-    process.env.JWT_ACCESS_EXPIRATION!.substring(-1, 2)
-);
-const REFRESH_TOKEN_EXPIRY = parseInt(
-    process.env.JWT_REFRESH_EXPIRATION!.substring(-1, 1)
-);
-
-const cookieOptions: CookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/",
-};
-
-const accessTokenCookieOptions = {
-    ...cookieOptions,
-    maxAge: ACCESS_TOEKN_EXPIRY * 60 * 1000,
-};
-
-const refreshTokenCookieOptions = {
-    ...cookieOptions,
-    path: "/api/auth/refresh",
-    maxAge: REFRESH_TOKEN_EXPIRY * 24 * 60 * 60 * 1000,
-};
 
 async function signUp(req: Request, res: Response, next: NextFunction) {
     try {
@@ -133,7 +112,7 @@ async function signin(req: Request, res: Response, next: NextFunction) {
             throw error;
         }
 
-        // Generate tokens
+        // generate tokens
         const accessToken = generateAccessToken({
             userId: user.id,
             email: user.email,
@@ -153,7 +132,8 @@ async function signin(req: Request, res: Response, next: NextFunction) {
                 token: refreshToken,
                 userId: user.id,
                 expiresAt: new Date(
-                    Date.now() + REFRESH_TOKEN_EXPIRY * 24 * 60 * 60 * 1000
+                    Date.now() +
+                        authConfig.refreshTokenExpiryDays * 24 * 60 * 60 * 1000
                 ),
             },
         });
