@@ -7,6 +7,7 @@ const ACCESS_TOEKN_EXPIRY = parseInt(
 const REFRESH_TOKEN_EXPIRY = parseInt(
     process.env.JWT_REFRESH_EXPIRATION!.substring(-1, 1)
 );
+const MAX_AGE = REFRESH_TOKEN_EXPIRY * 24 * 60 * 60 * 1000;
 
 export const baseCookieOptions: CookieOptions = {
     httpOnly: true,
@@ -15,15 +16,28 @@ export const baseCookieOptions: CookieOptions = {
     path: "/",
 };
 
+/**
+ * The accessToken cookie maxAge is same as the refreshToken.
+ * If accessToken cookie maxAge is short-lived(e.g 5mins),
+ * the browser would delete the cookie once it expired. That would cause the
+ * auth middleware to incorrectly report "Access token not found" instead of
+ * properly detecting and handling an expired token.
+ */
 export const accessTokenCookieOptions = {
     ...baseCookieOptions,
-    maxAge: ACCESS_TOEKN_EXPIRY * 60 * 1000,
+    // maxAge: ACCESS_TOEKN_EXPIRY * 60 * 1000,
+    maxAge: MAX_AGE,
 };
 
+/**
+ * refreshToken cookie is scoped to /api/auth/refresh
+ * so it’s only sent when requesting new access tokens.
+ * This reduces exposure by keeping it off normal API calls.
+ */
 export const refreshTokenCookieOptions = {
     ...baseCookieOptions,
     path: "/api/auth/refresh",
-    maxAge: REFRESH_TOKEN_EXPIRY * 24 * 60 * 60 * 1000,
+    maxAge: MAX_AGE,
 };
 
 export const authConfig = {

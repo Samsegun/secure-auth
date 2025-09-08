@@ -8,7 +8,7 @@ const protectedRouter = Router();
 // dashboard routes
 protectedRouter.get("/dashboard", authenticateToken, getDashboard);
 
-// logout routes
+// logout route
 protectedRouter.get("/logout", authenticateToken, logout);
 
 export default protectedRouter;

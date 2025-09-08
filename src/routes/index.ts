@@ -1,10 +1,10 @@
 import { Router } from "express";
-import authRouter from "./authRoutes";
 import protectedRouter from "./protectedRoutes";
+import publicRouter from "./publicRoutes";
 
 const appRouter = Router();
 
-appRouter.use("/auth", authRouter);
+appRouter.use("/auth", publicRouter);
 appRouter.use("/user", protectedRouter);
 
 export default appRouter;

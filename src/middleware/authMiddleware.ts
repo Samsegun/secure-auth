@@ -1,39 +1,8 @@
 import { NextFunction, Response } from "express";
+import jwt from "jsonwebtoken";
 import prisma from "../utils/prisma";
 import { verifyAccessToken } from "../utils/tokenManagement";
 import { AuthenticatedRequest, ErrorWithStatusCode } from "../utils/types";
-
-// function authRequired(req: Request, res: Response, next: NextFunction) {
-//     try {
-//         const bearer = req.headers.authorization;
-
-//         if (!bearer) {
-//             const error: ValidationError = new Error("Not Authorized!");
-//             error.statusCode = 401;
-//             throw error;
-//         }
-
-//         const token = bearer.split(" ")[1];
-//         if (!token) {
-//             const error: ValidationError = new Error("No valid token!");
-//             error!.statusCode = 401;
-//             throw error;
-//         }
-
-//         if (!process.env.JWT_SECRET) {
-//             throw new Error(
-//                 "JWT_SECRET is not defined in the environment variables"
-//             );
-//         }
-
-//         const user = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
-//         req.userId = user.userId;
-
-//         next();
-//     } catch (error) {
-//         next(error);
-//     }
-// }
 
 async function authenticateToken(
     req: AuthenticatedRequest,
@@ -41,15 +10,16 @@ async function authenticateToken(
     next: NextFunction
 ) {
     try {
-        const accessToken = req.cookies.accessToken as string;
+        const accessToken = req.cookies.accessToken;
         if (!accessToken) {
             const error: ErrorWithStatusCode = new Error(
                 "Access token not found"
             );
-            error.statusCode = 400;
+            error.statusCode = 401;
             throw error;
         }
 
+        // expired access tokens will fail here
         const decoded = verifyAccessToken(accessToken);
 
         // verify user still exists and is verified
@@ -77,6 +47,21 @@ async function authenticateToken(
 
         next();
     } catch (error) {
+        if (error instanceof jwt.TokenExpiredError) {
+            return res.status(401).json({
+                success: false,
+                message: "access token expired",
+                code: "TOKEN_EXPIRED",
+            });
+        }
+
+        if (error instanceof jwt.JsonWebTokenError) {
+            return res.status(401).json({
+                success: false,
+                message: "invalid access token",
+            });
+        }
+
         next(error);
     }
 }

@@ -4,11 +4,11 @@ import refreshTokens from "../controllers/refreshTokens";
 import verifyEmail from "../controllers/verifyEmail";
 import { createUser, signInUser, validate } from "../utils/validations";
 
-const authRouter = Router();
+const publicRouter = Router();
 
-authRouter.post("/signup", validate(createUser), signUp);
-authRouter.post("/signin", validate(signInUser), signin);
-authRouter.post("/refresh", refreshTokens);
-authRouter.get("/verify-email", verifyEmail);
+publicRouter.post("/signup", validate(createUser), signUp);
+publicRouter.post("/signin", validate(signInUser), signin);
+publicRouter.post("/refresh", refreshTokens);
+publicRouter.get("/verify-email", verifyEmail);
 
-export default authRouter;
+export default publicRouter;
