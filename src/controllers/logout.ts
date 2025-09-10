@@ -44,7 +44,11 @@ async function logout(
 
         // clear cookies
         res.clearCookie("accessToken", { ...baseCookieOptions, maxAge: 0 });
-        res.clearCookie("refreshToken", { ...baseCookieOptions, maxAge: 0 });
+        res.clearCookie("refreshToken", {
+            ...baseCookieOptions,
+            path: "/api/auth/refresh",
+            maxAge: 0,
+        });
 
         res.status(200).json({
             success: true,

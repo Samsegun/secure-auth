@@ -19,7 +19,7 @@ export const baseCookieOptions: CookieOptions = {
 /**
  * The accessToken cookie maxAge is same as the refreshToken.
  * If accessToken cookie maxAge is short-lived(e.g 5mins),
- * the browser would delete the cookie once it expired. That would cause the
+ * the browser deletes the cookie once it expired. That would cause the
  * auth middleware to incorrectly report "Access token not found" instead of
  * properly detecting and handling an expired token.
  */
