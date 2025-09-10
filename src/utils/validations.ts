@@ -6,6 +6,7 @@ const createUser = z.object({
     email: z.email("Invalid email format"),
     password: z
         .string()
+        .trim()
         .min(8, "Password must be at least 8 characters long")
         .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
         .regex(/[a-z]/, "Password must contain at least one lowercase letter")
@@ -18,8 +19,11 @@ const createUser = z.object({
 
 const signInUser = z.object({
     email: z.email("Invalid email format"),
-    password: z.string(),
+    password: z.string().trim(),
 });
+
+const validateForgotPassword = createUser.omit({ password: true });
+const validateResetPassword = createUser.omit({ email: true });
 
 // validation middleware
 const validate = (schema: z.ZodSchema) => {
@@ -61,4 +65,11 @@ const validateUserIdAndCreatorId = (
     next();
 };
 
-export { createUser, signInUser, validate, validateUserIdAndCreatorId };
+export {
+    createUser,
+    signInUser,
+    validate,
+    validateForgotPassword,
+    validateResetPassword,
+    validateUserIdAndCreatorId,
+};

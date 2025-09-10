@@ -84,7 +84,7 @@ export const refreshTokens = async (
                 userId: storedToken.user.id,
                 expiresAt: new Date(
                     Date.now() +
-                        authConfig.refreshTokenExpiryDays * 24 * 60 * 60 * 1000
+                        authConfig.refreshTokenExpiryTime * 24 * 60 * 60 * 1000
                 ),
             },
         });

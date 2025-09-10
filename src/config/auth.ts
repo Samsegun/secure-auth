@@ -7,6 +7,9 @@ const ACCESS_TOEKN_EXPIRY = parseInt(
 const REFRESH_TOKEN_EXPIRY = parseInt(
     process.env.JWT_REFRESH_EXPIRATION!.substring(-1, 1)
 );
+const REFRESH_PASSWORD_TOKEN_EXPIRY = parseInt(
+    process.env.REFRESH_PASSWORD_EXPIRATION!
+);
 const MAX_AGE = REFRESH_TOKEN_EXPIRY * 24 * 60 * 60 * 1000;
 
 export const baseCookieOptions: CookieOptions = {
@@ -41,6 +44,7 @@ export const refreshTokenCookieOptions = {
 };
 
 export const authConfig = {
-    accessTokenExpiryMinutes: ACCESS_TOEKN_EXPIRY,
-    refreshTokenExpiryDays: REFRESH_TOKEN_EXPIRY,
+    accessTokenExpiryTime: ACCESS_TOEKN_EXPIRY,
+    refreshTokenExpiryTime: REFRESH_TOKEN_EXPIRY,
+    refreshPasswordTokenTime: REFRESH_PASSWORD_TOKEN_EXPIRY,
 };
