@@ -22,14 +22,16 @@ interface ValidationError extends Error {
 interface AuthenticatedRequest extends Request {
     user?: {
         userId: string;
-        email: string;
+        // email: string;
+        role: string;
         isVerified: boolean;
     };
 }
 
 interface JwtPayload {
     userId: string;
-    email: string;
+    // email: string;
+    role: string;
     isVerified: boolean;
 }
 

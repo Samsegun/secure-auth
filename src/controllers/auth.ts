@@ -18,8 +18,6 @@ async function signUp(req: Request, res: Response, next: NextFunction) {
     try {
         const { email, password } = req.validatedData;
 
-        console.log(email, password);
-
         // check if user exists
         const userExists = await prisma.user.findUnique({
             where: {
@@ -41,7 +39,7 @@ async function signUp(req: Request, res: Response, next: NextFunction) {
         const verificationToken = uuidv4();
         const verificationTokenExpiry = new Date(
             Date.now() + 24 * 60 * 60 * 1000
-        ); //24hrs
+        );
 
         // create user
         const newUser = await prisma.user.create({
@@ -115,7 +113,8 @@ async function signin(req: Request, res: Response, next: NextFunction) {
         // generate tokens
         const accessToken = generateAccessToken({
             userId: user.id,
-            email: user.email,
+            // email: user.email,
+            role: user.role,
             isVerified: user.isVerified,
         });
 

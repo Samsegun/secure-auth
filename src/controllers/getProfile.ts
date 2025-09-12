@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import prisma from "../utils/prisma";
 import { AuthenticatedRequest, ErrorWithStatusCode } from "../utils/types";
 
-async function getDashboard(
+async function getProfile(
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
@@ -19,7 +19,7 @@ async function getDashboard(
             },
         });
         if (!user) {
-            const error: ErrorWithStatusCode = new Error("invalid credentials");
+            const error: ErrorWithStatusCode = new Error("User not found");
             error.statusCode = 401;
             throw error;
         }
@@ -35,4 +35,4 @@ async function getDashboard(
     }
 }
 
-export default getDashboard;
+export default getProfile;

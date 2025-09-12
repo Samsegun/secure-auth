@@ -45,6 +45,7 @@ export const refreshTokens = async (
                     select: {
                         id: true,
                         email: true,
+                        role: true,
                         isVerified: true,
                     },
                 },
@@ -66,7 +67,8 @@ export const refreshTokens = async (
         // generate new tokens
         const newAccessToken = generateAccessToken({
             userId: storedToken.user.id,
-            email: storedToken.user.email,
+            // email: storedToken.user.email,
+            role: storedToken.user.role,
             isVerified: storedToken.user.isVerified,
         });
 

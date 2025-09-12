@@ -25,7 +25,7 @@ async function authenticateToken(
         // verify user still exists and is verified
         const user = await prisma.user.findUnique({
             where: { id: decoded.userId },
-            select: { id: true, email: true, isVerified: true },
+            select: { id: true, email: true, role: true, isVerified: true },
         });
         if (!user) {
             const error: ErrorWithStatusCode = new Error("User not found");
@@ -41,7 +41,8 @@ async function authenticateToken(
 
         req.user = {
             userId: user.id,
-            email: user.email,
+            // email: user.email,
+            role: user.role,
             isVerified: user.isVerified,
         };
 
