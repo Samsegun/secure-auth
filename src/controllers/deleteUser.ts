@@ -1,15 +1,11 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { hasPermission, Permissions } from "../utils/permissionManagement";
 import prisma from "../utils/prisma";
-import { AuthenticatedRequest, ErrorWithStatusCode } from "../utils/types";
+import { ErrorWithStatusCode, JWTAuthenticatedRequest } from "../utils/types";
 
-async function deleteUser(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-) {
+async function deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
-        const { userId } = req.user!;
+        const { userId } = (req as JWTAuthenticatedRequest).user!;
 
         const superUser = await prisma.user.findUnique({
             where: { id: userId },

@@ -2,10 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "../utils/prisma";
 import { ErrorWithStatusCode } from "../utils/types";
 
-// async function verifyEmail(req: Request, res: Response, next: NextFunction) {
-//     return res.status(200).json({ message: "verify email response" });
-// }
-
 async function verifyEmail(req: Request, res: Response, next: NextFunction) {
     try {
         const { token } = req.query;

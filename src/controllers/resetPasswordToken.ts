@@ -1,15 +1,15 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import { z } from "zod";
 import { hashPassword } from "../utils/passwordUtils";
 import prisma from "../utils/prisma";
-import { AuthenticatedRequest, ErrorWithStatusCode } from "../utils/types";
+import { ErrorWithStatusCode, ValidatedRequest } from "../utils/types";
+import { validateResetPassword } from "../utils/validations";
 
-async function resetPassword(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-) {
+async function resetPassword(req: Request, res: Response, next: NextFunction) {
     try {
-        const { token, password: newPassword } = req.body;
+        const { token, password: newPassword } = (
+            req.body as ValidatedRequest<z.infer<typeof validateResetPassword>>
+        ).body;
         if (!token || !newPassword) {
             const error: ErrorWithStatusCode = new Error(
                 "token and new password is required"

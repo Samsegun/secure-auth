@@ -1,14 +1,10 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import prisma from "../utils/prisma";
-import { AuthenticatedRequest, ErrorWithStatusCode } from "../utils/types";
+import { ErrorWithStatusCode, JWTAuthenticatedRequest } from "../utils/types";
 
-async function getModerators(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-) {
+async function getModerators(req: Request, res: Response, next: NextFunction) {
     try {
-        const { userId } = req.user!;
+        const { userId } = (req as JWTAuthenticatedRequest).user!;
 
         const user = await prisma.user.findUnique({
             where: { id: userId },

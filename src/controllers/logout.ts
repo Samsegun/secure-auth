@@ -1,13 +1,9 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { baseCookieOptions } from "../config/auth";
 import prisma from "../utils/prisma";
-import { AuthenticatedRequest } from "../utils/types";
+import { JWTAuthenticatedRequest } from "../utils/types";
 
-async function logout(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-) {
+async function logout(req: Request, res: Response, next: NextFunction) {
     try {
         /**
          * 'Refresh not sent from client'
@@ -34,11 +30,12 @@ async function logout(
         //         );
         //     }
         // }
+        const { userId } = (req as JWTAuthenticatedRequest).user!;
 
         // this will logout on all devices
         await prisma.refreshToken.deleteMany({
             where: {
-                userId: req.user!.userId,
+                userId,
             },
         });
 

@@ -12,8 +12,21 @@ interface AuthenticatedUser {
     isVerified: boolean;
 }
 
-interface AuthenticatedRequest extends Request {
+// passport user type (what comes from OAuth)
+interface PassportUser {
+    id: string;
+    email: string;
+    name?: string;
+    role: string;
+    avatar?: string;
+}
+
+interface JWTAuthenticatedRequest extends Request {
     user?: AuthenticatedUser;
+}
+
+interface FlexibleAuthRequest extends Request {
+    user?: AuthenticatedUser | PassportUser;
 }
 
 interface ErrorWithStatusCode extends Error {
@@ -38,18 +51,13 @@ interface RefreshTokenPayload {
     tokenId: string;
 }
 
-type User = {
-    id: number;
-    username: string;
-    password: string;
-};
-
 export {
-    AuthenticatedRequest,
+    AuthenticatedUser,
     ErrorWithStatusCode,
+    FlexibleAuthRequest,
+    JWTAuthenticatedRequest,
     JwtPayload,
     RefreshTokenPayload,
-    User,
     ValidatedRequest,
     ValidationError,
 };

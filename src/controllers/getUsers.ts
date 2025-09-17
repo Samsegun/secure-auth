@@ -1,12 +1,8 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import prisma from "../utils/prisma";
-import { AuthenticatedRequest, ErrorWithStatusCode } from "../utils/types";
+import { ErrorWithStatusCode } from "../utils/types";
 
-async function getUsers(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-) {
+async function getUsers(req: Request, res: Response, next: NextFunction) {
     try {
         const users = await prisma.user.findMany({
             take: 10,

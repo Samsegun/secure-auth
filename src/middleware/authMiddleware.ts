@@ -1,11 +1,11 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import prisma from "../utils/prisma";
 import { verifyAccessToken } from "../utils/tokenManagement";
-import { AuthenticatedRequest, ErrorWithStatusCode } from "../utils/types";
+import { ErrorWithStatusCode, JWTAuthenticatedRequest } from "../utils/types";
 
 async function authenticateUserToken(
-    req: AuthenticatedRequest,
+    req: Request,
     res: Response,
     next: NextFunction
 ) {
@@ -39,7 +39,7 @@ async function authenticateUserToken(
             throw error;
         }
 
-        req.user = {
+        (req as JWTAuthenticatedRequest).user = {
             userId: user.id,
             // email: user.email,
             role: user.role,
