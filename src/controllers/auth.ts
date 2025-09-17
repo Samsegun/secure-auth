@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 import {
     accessTokenCookieOptions,
     authConfig,
@@ -12,11 +13,14 @@ import {
     generateAccessToken,
     generateRefreshToken,
 } from "../utils/tokenManagement";
-import { ErrorWithStatusCode } from "../utils/types";
+import { ErrorWithStatusCode, ValidatedRequest } from "../utils/types";
+import { createUser, signInUser } from "../utils/validations";
 
 async function signUp(req: Request, res: Response, next: NextFunction) {
     try {
-        const { email, password } = req.validatedData;
+        const { email, password } = (
+            req as ValidatedRequest<z.infer<typeof createUser>>
+        ).validatedData;
 
         // check if user exists
         const userExists = await prisma.user.findUnique({
@@ -72,7 +76,9 @@ async function signUp(req: Request, res: Response, next: NextFunction) {
 
 async function signin(req: Request, res: Response, next: NextFunction) {
     try {
-        const { email, password } = req.validatedData;
+        const { email, password } = (
+            req as ValidatedRequest<z.infer<typeof signInUser>>
+        ).validatedData;
 
         // find user
         const user = await prisma.user.findUnique({

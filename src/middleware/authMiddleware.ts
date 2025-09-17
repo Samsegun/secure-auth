@@ -4,7 +4,7 @@ import prisma from "../utils/prisma";
 import { verifyAccessToken } from "../utils/tokenManagement";
 import { AuthenticatedRequest, ErrorWithStatusCode } from "../utils/types";
 
-async function authenticateToken(
+async function authenticateUserToken(
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
@@ -67,4 +67,4 @@ async function authenticateToken(
     }
 }
 
-export { authenticateToken };
+export { authenticateUserToken };

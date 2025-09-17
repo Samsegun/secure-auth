@@ -1,6 +1,6 @@
-import express from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { z } from "zod";
-import { ErrorWithStatusCode, ValidationError } from "./types";
+import { ValidatedRequest, ValidationError } from "./types";
 
 const createUser = z.object({
     email: z.email("Invalid email format"),
@@ -26,12 +26,10 @@ const validateForgotPassword = createUser.omit({ password: true });
 const validateResetPassword = createUser.omit({ email: true });
 
 // validation middleware
-const validate = (schema: z.ZodSchema) => {
-    return (
-        req: express.Request,
-        res: express.Response,
-        next: express.NextFunction
-    ) => {
+const validate = <T extends z.ZodSchema>(
+    schema: T
+): RequestHandler<{}, any, any, any> => {
+    return (req: Request, res: Response, next: NextFunction): void => {
         const result = schema.safeParse(req.body);
 
         if (!result.success) {
@@ -45,24 +43,9 @@ const validate = (schema: z.ZodSchema) => {
             throw error;
         }
 
-        req.validatedData = result.data;
+        (req as ValidatedRequest<z.infer<T>>).validatedData = result.data;
         next();
     };
-};
-
-const validateUserIdAndCreatorId = (
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-) => {
-    // throw error if creator id does not match user id
-    if (req.validatedData.creator !== req.userId) {
-        const error: ErrorWithStatusCode = new Error("Operation failed!");
-        error.statusCode = 403;
-        throw error;
-    }
-
-    next();
 };
 
 export {
@@ -71,5 +54,4 @@ export {
     validate,
     validateForgotPassword,
     validateResetPassword,
-    validateUserIdAndCreatorId,
 };

@@ -14,8 +14,11 @@ import {
 
 const publicRouter = Router();
 
-publicRouter.post("/signup", validate(createUser), signUp);
-publicRouter.post("/signin", validate(signInUser), signin);
+const validateSignUp = validate(createUser);
+const validateSignIn = validate(signInUser);
+
+publicRouter.post("/signup", validateSignUp, signUp);
+publicRouter.post("/signin", validateSignIn, signin);
 publicRouter.post(
     "/forgot-password",
     validate(validateForgotPassword),
