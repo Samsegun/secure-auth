@@ -1,17 +1,17 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 import { authConfig } from "../config/auth";
 import { sendPasswordResetEmail } from "../utils/emailUtils";
 import prisma from "../utils/prisma";
-import { AuthenticatedRequest } from "../utils/types";
+import { ValidatedRequest } from "../utils/types";
+import { validateForgotPassword } from "../utils/validations";
 
-async function forgotPassword(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-) {
+async function forgotPassword(req: Request, res: Response, next: NextFunction) {
     try {
-        const { email } = req.body;
+        const { email } = (
+            req as ValidatedRequest<z.infer<typeof validateForgotPassword>>
+        ).validatedData;
 
         const user = await prisma.user.findUnique({
             where: { email },

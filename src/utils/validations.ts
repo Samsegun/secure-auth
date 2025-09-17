@@ -23,7 +23,10 @@ const signInUser = z.object({
 });
 
 const validateForgotPassword = createUser.omit({ password: true });
-const validateResetPassword = createUser.omit({ email: true });
+const validateResetPassword = z.object({
+    token: z.string().trim(),
+    password: createUser.shape.password,
+});
 
 // validation middleware
 const validate = <T extends z.ZodSchema>(

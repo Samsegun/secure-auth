@@ -8,8 +8,8 @@ import { validateResetPassword } from "../utils/validations";
 async function resetPassword(req: Request, res: Response, next: NextFunction) {
     try {
         const { token, password: newPassword } = (
-            req.body as ValidatedRequest<z.infer<typeof validateResetPassword>>
-        ).body;
+            req as ValidatedRequest<z.infer<typeof validateResetPassword>>
+        ).validatedData;
         if (!token || !newPassword) {
             const error: ErrorWithStatusCode = new Error(
                 "token and new password is required"
