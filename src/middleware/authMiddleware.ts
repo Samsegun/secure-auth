@@ -1,70 +1,62 @@
 import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import prisma from "../utils/prisma";
-import { verifyAccessToken } from "../utils/tokenManagement";
 import { ErrorWithStatusCode, JWTAuthenticatedRequest } from "../utils/types";
+import authenticateUserToken from "./customAuthMiddleware";
+import normalizeOAuthUser from "./oauthMiddleware";
 
-async function authenticateUserToken(
+// unified authentication middleware
+export async function authenticateUser(
     req: Request,
     res: Response,
     next: NextFunction
 ) {
     try {
-        const accessToken = req.cookies.accessToken;
-        if (!accessToken) {
-            const error: ErrorWithStatusCode = new Error(
-                "Access token not found"
+        // check for JWT authentication first
+        if (req.cookies.accessToken) {
+            console.log("attempting JWT authentication");
+            return authenticateUserToken(
+                req as JWTAuthenticatedRequest,
+                res,
+                next
             );
-            error.statusCode = 401;
-            throw error;
         }
 
-        // expired access tokens will fail here
-        const decoded = verifyAccessToken(accessToken);
+        // if there's no acessToken, check for oauth user
+        if (req.isAuthenticated && req.isAuthenticated()) {
+            console.log("found OAuth session, normalizing user");
 
-        // verify user still exists and is verified
-        const user = await prisma.user.findUnique({
-            where: { id: decoded.userId },
-            select: { id: true, email: true, role: true, isVerified: true },
+            const userData = await req.user;
+            if (!userData) {
+                const error: ErrorWithStatusCode = new Error(
+                    "No user data found"
+                );
+                error.statusCode = 401;
+                throw error;
+            }
+
+            const normalizedUser = await normalizeOAuthUser(userData);
+
+            if (!normalizedUser) {
+                const error: ErrorWithStatusCode = new Error(
+                    "Invalid OAuth user session"
+                );
+                error.statusCode = 401;
+                throw error;
+            }
+
+            // set user in the same format as custom auth
+            (req as JWTAuthenticatedRequest).user = normalizedUser;
+            return next();
+        }
+
+        // if the checks above fails then it means no valid authentication found
+        return res.status(401).json({
+            success: false,
+            message: "Authentication required",
         });
-        if (!user) {
-            const error: ErrorWithStatusCode = new Error("User not found");
-            error.statusCode = 404;
-            throw error;
-        }
-
-        if (!user.isVerified) {
-            const error: ErrorWithStatusCode = new Error("Email not verified");
-            error.statusCode = 403;
-            throw error;
-        }
-
-        (req as JWTAuthenticatedRequest).user = {
-            userId: user.id,
-            // email: user.email,
-            role: user.role,
-            isVerified: user.isVerified,
-        };
-
-        next();
     } catch (error) {
-        if (error instanceof jwt.TokenExpiredError) {
-            return res.status(401).json({
-                success: false,
-                message: "access token expired",
-                code: "TOKEN_EXPIRED",
-            });
-        }
-
-        if (error instanceof jwt.JsonWebTokenError) {
-            return res.status(401).json({
-                success: false,
-                message: "invalid access token",
-            });
-        }
-
+        console.error("Authentication error:", error);
         next(error);
     }
 }
 
-export { authenticateUserToken };
+export default authenticateUser;

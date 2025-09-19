@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticateUserToken } from "../middleware/authMiddleware";
+import authenticateUser from "../middleware/authMiddleware";
 import publicRouter from "./publicRoutes";
 import userRouter from "./userRoutes";
 
@@ -21,6 +21,6 @@ appRouter.use("/dashboard", (req, res) => {
 });
 
 appRouter.use("/auth", publicRouter);
-appRouter.use("/user", authenticateUserToken, userRouter);
+appRouter.use("/user", authenticateUser, userRouter);
 
 export default appRouter;

@@ -34,7 +34,7 @@ oauthRouter.get(
     }
 );
 
-// Get current user (for frontend to check auth status)
+// get current user (for frontend to check auth status)
 oauthRouter.get("/me", (req, res) => {
     if (req.isAuthenticated()) {
         res.json({
@@ -49,7 +49,7 @@ oauthRouter.get("/me", (req, res) => {
     }
 });
 
-// Logout route
+// logout route
 oauthRouter.post("/logout", (req, res) => {
     req.logout(err => {
         if (err) {
