@@ -11,11 +11,14 @@ import {
     validateForgotPassword,
     validateResetPassword,
 } from "../utils/validations";
+import oauthRouter from "./oauthRoutes";
 
 const publicRouter = Router();
 
 const validateSignUp = validate(createUser);
 const validateSignIn = validate(signInUser);
+
+publicRouter.use(oauthRouter);
 
 publicRouter.post("/signup", validateSignUp, signUp);
 publicRouter.post("/signin", validateSignIn, signin);

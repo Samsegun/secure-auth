@@ -98,7 +98,7 @@ async function signin(req: Request, res: Response, next: NextFunction) {
         }
 
         // compare passwords
-        const passwordIsEqual = await comparePassword(password, user.password);
+        const passwordIsEqual = await comparePassword(password, user.password!);
         if (!passwordIsEqual) {
             const error: ErrorWithStatusCode = new Error(
                 "invalid credentials!"
