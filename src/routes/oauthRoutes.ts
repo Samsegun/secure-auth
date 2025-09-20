@@ -49,20 +49,4 @@ oauthRouter.get("/me", (req, res) => {
     }
 });
 
-// logout route
-oauthRouter.post("/logout", (req, res) => {
-    req.logout(err => {
-        if (err) {
-            return res.status(500).json({
-                success: false,
-                message: "Error logging out",
-            });
-        }
-        res.json({
-            success: true,
-            message: "Logged out successfullyasaa",
-        });
-    });
-});
-
 export default oauthRouter;

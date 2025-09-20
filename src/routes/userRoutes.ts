@@ -1,6 +1,6 @@
 import { Router } from "express";
 import getProfile from "../controllers/getProfile";
-import logout from "../controllers/logout";
+import unifiedLogout from "../controllers/logout";
 import adminRouter from "./adminRoutes";
 import moderatorRouter from "./moderatorRoutes";
 
@@ -14,6 +14,6 @@ userRouter.use("/admin", adminRouter);
 userRouter.use("/moderator", moderatorRouter);
 
 // logout route
-userRouter.get("/logout", logout);
+userRouter.post("/logout", unifiedLogout);
 
 export default userRouter;

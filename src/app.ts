@@ -27,6 +27,12 @@ app.use(
         credentials: true,
     })
 );
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan("combined"));
+app.use(cookieParser());
+
 app.use(
     session({
         secret: process.env.SESSION_SECRET!,
@@ -42,10 +48,6 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-app.use(morgan("combined"));
-app.use(express.json());
-app.use(cookieParser());
 
 app.use("/api", appRouter);
 
