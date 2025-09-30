@@ -24,7 +24,7 @@ export async function authenticateUser(
         if (req.isAuthenticated && req.isAuthenticated()) {
             console.log("found OAuth session, normalizing user");
 
-            const userData = await req.user;
+            const userData = (await req.user) as any;
             if (!userData) {
                 const error: ErrorWithStatusCode = new Error(
                     "No user data found"

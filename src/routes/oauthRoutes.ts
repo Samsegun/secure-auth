@@ -3,8 +3,7 @@ import passport from "passport";
 
 const oauthRouter = Router();
 
-const PORT = process.env.PORT!;
-// const FRONTEND_URL = process.env.FRONTEND_URL!
+const FRONTEND_URL = process.env.FRONTEND_URL!;
 
 oauthRouter.get(
     "/google",
@@ -13,24 +12,14 @@ oauthRouter.get(
     })
 );
 
-// oauthRouter.get('/google/callback',
-//     passport.authenticate('google', {
-//         failureRedirect: `${FRONTEND_URL}/login?error=oauth_failed`
-//     }),
-//     (req, res) => {
-//         // successful authentication
-//         res.redirect(`${FRONTEND_URL}/dashboard`);
-//     }
-// );
-
 oauthRouter.get(
     "/google/callback",
     passport.authenticate("google", {
-        failureRedirect: `http://localhost:${PORT}/api/login?error=oauth_failed`,
+        failureRedirect: `${FRONTEND_URL}/signin?error=oauth_failed`,
     }),
     (req, res) => {
         // successful authentication
-        res.redirect(`http://localhost:${PORT}/api/dashboard`);
+        res.redirect(`${FRONTEND_URL}/`);
     }
 );
 

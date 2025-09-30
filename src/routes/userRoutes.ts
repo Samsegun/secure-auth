@@ -1,10 +1,14 @@
 import { Router } from "express";
+import checkAuthStatus from "../controllers/checkAuthStatus";
 import getProfile from "../controllers/getProfile";
 import unifiedLogout from "../controllers/logout";
 import adminRouter from "./adminRoutes";
 import moderatorRouter from "./moderatorRoutes";
 
 const userRouter = Router();
+
+// auth status endpoint
+userRouter.get("/auth-status", checkAuthStatus);
 
 // general user routes
 userRouter.get("/profile", getProfile);

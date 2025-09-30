@@ -63,9 +63,10 @@ async function signUp(req: Request, res: Response, next: NextFunction) {
         await sendVerificationEmail(email, verificationToken);
 
         return res.status(201).json({
+	success: true,
             message: "User created. Please check email to verify account",
             data: {
-                user: newUser.id,
+                id: newUser.id,
                 email: newUser.email,
             },
         });
@@ -148,7 +149,7 @@ async function signin(req: Request, res: Response, next: NextFunction) {
         res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
 
         res.status(200).json({
-            message: "Signed in successfully",
+	    success: true,
             data: {
                 user: {
                     id: user.id,
